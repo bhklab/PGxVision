@@ -11,6 +11,7 @@ source ('clinicalTab.R')
 source ('logicalTab.R')
 source ('biomarkerTab.R')
 source ('treatmentTab.R')
+source ('drugTab.R')
 
 # Change options for this session
 opts <- options()
@@ -26,6 +27,7 @@ ui <- dashboardPage(
         icon=icon("stethoscope")),
       menuItem("Logical Model", tabName="logicalModel",
         icon=icon("stethoscope")),
+      menuItem("Drug Analysis", tabName = 'druganalysis', icon = icon('capsules')),
       menuItem("Biomarker Analysis", tabName = "biomarkers", icon = icon("dna")),
       menuItem("Treatment Response", tabName = "drugResponse",
               icon = icon("capsules"))
@@ -45,6 +47,7 @@ ui <- dashboardPage(
     tabItems(
       clinicalTabInputUI,
       logicalTabInputUI,
+      drugTabInputUI,
       biomarkerTabInputUI,
       treatmentTabInputUI
     )
@@ -56,18 +59,21 @@ server <- function(input, output) {
   # Define reactive values
   clinicalTabRV <- clinicalTabCreateRV()
   logicalTabRV <- logicalTabCreateRV()
+  drugTabRV <- drugTabCreateRV()
   biomarkerTabRV <- biomarkerTabCreateRV()
   treatmentTabRV <- treatmentTabCreateRV()
   
   # Observers
   clinicalTabObservers(input, clinicalTabRV)
   logicalTabObservers(input, logicalTabRV)
+  drugTabObservers(input, drugTabRV)
   biomarkerTabObservers(input, biomarkerTabRV)
   treatmentTabObservers(input, treatmentTabRV)
   
   # Output UI
   clinicalTabOutputUI(input, clinicalTabRV, output)
   logicalTabOutputUI(input, logicalTabRV, output)
+  drugTabOutputUI(input, drugTabRV, output)
   biomarkerTabOutputUI(input, biomarkerTabRV, output)
   treatmentTabOutputUI(input, treatmentTabRV, output)
 }

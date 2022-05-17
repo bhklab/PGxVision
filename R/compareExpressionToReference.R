@@ -17,7 +17,7 @@
 #' @export
 computeBiomarkerPercentile <- function(feature, value, reference) {
     suppressWarnings({
-        reference_ecdf <- ecdf(reference[feature, ])
+        reference_ecdf <- ecdf(as.numeric(reference[feature, ]))
     })
     return(reference_ecdf(value))
 }

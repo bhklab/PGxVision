@@ -68,7 +68,9 @@ clinicalTabObservers <- function(input, rv) {
   observeEvent(input$patientFile, {
     req(input$patientFile)
     df_ <- data.table::fread(input$patientFile$datapath)
-    rv$patientDf <- data.frame(df_[, -1], row.names=df_[[1]])
+    
+    # convert data table to data frame with genes as row names
+    rv$patientDf <- data.frame(df_[, -1], row.names=df_[[1]]) 
   })
   
   observeEvent(input$referencePopulationFile, {
@@ -90,9 +92,9 @@ clinicalTabOutputUI <- function (input, rv, output) {
   
   output$clinicalDensity <- renderPlot(
     PGxVision::densityPlotBiomarkerPercentile(
-      input$feature,
-      rv$patientDf[input$feature, ],
-      rv$referenceDf)
+      input$feature, # the gene of interest (string)
+      rv$patientDf[input$feature, ], # the patient's expression for the gene chosen (float)
+      rv$referenceDf) 
   )
   
   output$pdbBiomarkerDfFiltered <- renderDataTable({
