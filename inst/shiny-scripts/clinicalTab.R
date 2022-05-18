@@ -85,17 +85,25 @@ clinicalTabObservers <- function(input, rv) {
 #Return all output objects
 clinicalTabOutputUI <- function (input, rv, output) {
   output$featureSelect <- renderUI({
-    featureChoices <- unique(row.names(rv$patientDf))
-    selectInput("feature", "Feature", c("Select a feature..." = "",
-                                        featureChoices), selected="ERBB2")
+    pdf <- rv$patientDf
+    future_promise({
+      featureChoices <- unique(row.names(pdf))
+      return(selectizeInput("feature", "Feature", c("Select a feature..." = "",
+                                                 featureChoices), selected="ERBB2"))
+    })
   })
   
-  output$clinicalDensity <- renderPlot(
-    PGxVision::densityPlotBiomarkerPercentile(
-      input$feature, # the gene of interest (string)
-      rv$patientDf[input$feature, ], # the patient's expression for the gene chosen (float)
-      rv$referenceDf) 
-  )
+  output$clinicalDensity <- renderPlot({
+    pdf <- rv$patientDf
+    rdf <- rv$referenceDf
+    input_feature <- input$feature
+    future_promise({
+      PGxVision::densityPlotBiomarkerPercentile(
+        input_feature, # the gene of interest (string)
+        pdf[input_feature, ], # the patient's expression for the gene chosen (float)
+        rdf) 
+    })
+  })
   
   output$pdbBiomarkerDfFiltered <- renderDataTable({
     df_ <- if (input$feature != "") {

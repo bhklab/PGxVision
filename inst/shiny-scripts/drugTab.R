@@ -25,12 +25,22 @@ pharmacodbBiomarkersTable <- box(
   column(width=8, align="center", dataTableOutput("pdbBiomarkers"))
 )
 
+instructionsMessage <- box(
+  width=13, 
+  textOutput('instructions'),
+  actionButton("funButton", "Show Message"),
+)
+
 # Return all tab input rows 
 drugTabInputUI = tabItem(
   tabName= "druganalysis",
   h2("Drug Analysis"),
   fluidRow(drugBiomarkerFileUploadBox),
+  #add_busy_spinner(spin = "fading-circle"),
+  instructionsMessage,
   fluidRow(pharmacodbBiomarkersTable),
+  add_busy_bar(color = "#FFFFFF") # To show busy indicator
+  
 )
 
 ### REACTIVE VALUES AND OBSERVERS ###
@@ -62,17 +72,42 @@ drugTabObservers <- function(input, rv) {
     df_ <- data.table::fread(input$referencePopulationFileDrugTab$datapath)
     rv$referenceDf <- data.frame(df_[, -1], row.names=df_[[1]])
   })
+  
+  observeEvent(input$funButton, {
+    shinyalert("Title of Modal", "Body of modal", type= "error")
+  })
 }
 
 ### OUTPUT ###
 
 #Return all output objects
 drugTabOutputUI <- function (input, rv, output) {
+  output$instructions <- renderText({
+    if(identical(rv$patientDf, NULL)) { return("Please upload your patient's gene expression file.")}
+    else if (identical(rv$referenceDf, NULL)) { return("Please upload your reference population gene expression file.")}
+    else {
+      return("View your results below")
+      #show_spinner()
+    }
+  })
+  
   output$pdbBiomarkers <- renderDataTable({
-    df_ <- PGxVision::retrieveDiffExpressedGenes(rv$patientDf, rv$referenceDf, data.frame(rv$pdbBiomarkersDf)) 
-    names(df_)[names(df_) == 'estimate'] <- 'correlation'
-    names(df_)[names(df_) == 'percentile'] <- 'sample expression percentile'
-    df_[order(df_$pvalue, -abs(df_$correlation)), c('compound_name', 'correlation', 'pvalue', 'gene_symbol', 
-                                                    'sample expression percentile', 'inchikey', 'pubchem', 'chembl_id', 'tissue')]
+    pdf <- rv$patientDf
+    rdf <- rv$referenceDf
+    
+    # Return empty table if files not uploaded 
+    if (identical(pdf, NULL) | identical(rdf, NULL)) {
+      return(data.frame(Biomarkers=character()))
+    }
+    
+    biodf <- data.frame(rv$pdbBiomarkersDf)
+     future_promise( {
+      df_ <- PGxVision::retrieveDiffExpressedGenes(pdf, rdf, biodf) 
+      names(df_)[names(df_) == 'estimate'] <- 'correlation'
+      names(df_)[names(df_) == 'percentile'] <- 'sample expression percentile'
+      df_[order(df_$pvalue, -abs(df_$correlation)), c('compound_name', 'correlation', 'pvalue', 'gene_symbol', 
+                                                      'sample expression percentile', 'inchikey', 'pubchem', 'chembl_id', 'tissue')]
+    
+      }) 
   })
 }

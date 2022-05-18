@@ -5,6 +5,11 @@ library(plotly)
 library(magrittr)
 library(jsonlite)
 library(data.table)
+library(promises)
+library(future)
+library(shinyalert)
+library(shinybusy)
+plan(multisession)
 
 # Import files for each tab 
 source ('clinicalTab.R')

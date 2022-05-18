@@ -30,7 +30,7 @@ retrieveDiffExpressedGenes <- function(patientDF, referenceDF, biomarkerDF) {
   subsetUnder = biomarkerDF[(biomarkerDF$estimate < 0 & biomarkerDF$gene_symbol %in% names(underexpressed)), ]
  
   subsetOver$percentile <- overexpressed[subsetOver[["gene_symbol"]]]
-  subsetUnder$percentile <- overexpressed[subsetUnder[['gene_symbol']]]
+  subsetUnder$percentile <- underexpressed[subsetUnder[['gene_symbol']]]
   
   return(rbind(subsetOver, subsetUnder))
 }
