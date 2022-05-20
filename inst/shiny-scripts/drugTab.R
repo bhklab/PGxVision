@@ -39,7 +39,7 @@ drugTabInputUI = tabItem(
   #add_busy_spinner(spin = "fading-circle"),
   instructionsMessage,
   fluidRow(pharmacodbBiomarkersTable),
-  add_busy_bar(color = "#FFFFFF") # To show busy indicator
+  
   
 )
 
