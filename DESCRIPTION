@@ -2,9 +2,29 @@ Package: PGxVision
 Type: Package
 Title: Visualize Biomarkers and Pharmacogenomic Data
 Version: 0.1.0
-Authors@R: person("E", "Gorobets", email = "evgeniya.gorobets@mail.utoronto.ca",
-            role = c("aut", "cre"))
-Maintainer: Evgeniya Gorobets <evgeniya.gorobets@mail.utoronto.ca>
+Authors@R: c(
+    person(
+        first="Evigenya",
+        last="Gorobets",
+        email = "evgeniya.gorobets@mail.utoronto.ca",
+        role = c("aut")),
+    person(
+        first="Kevin",
+        last="Tabatabaei",
+        email="",
+        role= c("aut")),
+    person(
+        first="Christopher",
+        last="Eeles",
+        email="christopher.eeles@uhnresearch.ca",
+        role=c("aut")),
+    person(
+        first="Benjamin",
+        last="Haibe-Kains",
+        email="benjamin.haibe.kains@utoronto.ca",
+        role=c("aut", "cre"))
+    )
+Maintainer: Benjamin Haibe-Kains <benjamin.haibe.kains@utoronto.ca>
 Description: This is a generic plotting package meant to provide an easy way
     for bioinformaticists and clinicians to visualize pharmacogenomic data. The
     package provides some of the most commonly used graphs for visualizing drug
@@ -23,7 +43,7 @@ Description: This is a generic plotting package meant to provide an easy way
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Imports:
     checkmate,
     data.table,
