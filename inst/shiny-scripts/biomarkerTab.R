@@ -1,3 +1,6 @@
+### IMPORT COMPONENTS ###
+source('components/tip.R')
+
 ### INITIALIZE VARIABLES ###
 
 sampleDataDir <- "extdata/sample_data/"
@@ -17,84 +20,86 @@ blankGene <- data.table::data.table(gene="", abs_gene_seq_start="", chr="",
 blankGeneSet <- data.table::data.table(gs_id="", gs_name="", gs_exact_source="",
                                        gs_url="", gs_description="")
 
+### INITIALIZE ###
+
+# Function to initialize everything in this page
+biomarkerTabInitialize <- function(input, output) {
+  biomarkerTabRV <- biomarkerTabCreateRV()
+  biomarkerTabObservers(input, biomarkerTabRV)
+  biomarkerTabOutputUI(input, biomarkerTabRV, output)
+}
+
 ### INPUT ###
 
 # Helper functions
-biomarkerFileUploadBox <- box(
-  width = 12,
-  column(
-    width = 6,
-    fileInput("biomarkerFile", "Upload Biomarker CSV:",
-              accept = c("text/csv", ".csv"), buttonLabel="Browse files")
-  ),
-  column(
-    width=6,
-    fileInput("genomeFile", "Upload Genome CSV:",
-              accept = c("text/csv", ".csv"), buttonLabel="Browse files")
-  ),
-  p("NOTE: If no biomarker file is uploaded, then a sample biomarker dataset
-  will be used by default. If no genome file is uploaded,
-  then the GRCh38.p13 genome will be used automatically.")
-)
-
-filterBiomarkersBox <- box(
-  width = 12, title = "Filter Biomarkers",
-  column(width = 4, uiOutput("tissueSelect")),
-  column(width = 4, uiOutput("compoundSelect")),
-  column(width = 4, uiOutput("mDataTypeSelect"))
-)
-
-plotPropertiesBox <- box(
-  width = 12, collapsible = T, collapsed = T, title = "Plot Properties",
-  column(
-    width = 4,
-    sliderInput("pValCutoff", "P-Value Cutoff", min=0, max=1, value=0.05)),
-  # TODO: something funny happens when pval >= 0.39 ?? consider
-  # reducing range of slider
-)
-
-geneSetAnalysisBox <- box(
-  width=12,
-  h3("Gene Set Analysis"),
-  column(width = 3, uiOutput("geneSelect")),
-  column(
-    width = 3,
-    selectInput("gsType", "Gene Set Type",
-                c("Select a gene set type..." = "", gsTypes), selected = "")
-  ),
-  column(
-    width = 3, selectInput("simAlgo", "Similarity Algorithm", c("overlap"))
-  ),
-  column(
-    width = 3, br(),
-    actionButton("runGsAnalysis", "Run Gene Set Analysis!")
-  ),
-  column(
-    width = 8,
-    uiOutput("plotError"),
-    shinybusy::use_busy_spinner(spin = "fading-circle"),
-    visNetwork::visNetworkOutput("networkPlot")),
-  column(
-    width = 4, br(),
-    sliderInput("simCutoff", "Similarity Cutoff",
-                min = 0, max = 1, value = 0.5),
-    br(), h4("Gene Set Info"), uiOutput("gsInfo")
-  ),
-)
 
 # Return all tab input rows 
-biomarkerTabInputUI <- tabItem(
-  tabName = "biomarkers",
-  h2("Biomarker Analysis"),
-  fluidRow(biomarkerFileUploadBox),
-  fluidRow(filterBiomarkersBox),
-  fluidRow(plotPropertiesBox),
-  fluidRow(
-    box(plotlyOutput("manhattanPlot")),
-    box(plotlyOutput("volcanoPlot"))
+biomarkerTabUI <- div(
+  h5(align='center', style='font-weight: bold', 'Filter Biomarkers'),
+  br(), 
+  div(class='flex',style='justify-content: space-between;',
+      uiOutput("tissueSelect"), 
+      uiOutput("compoundSelect"),
+      uiOutput("mDataTypeSelect"),
+      sliderInput("pValCutoff", "P-Value Cutoff", min=0, max=1, value=0.05, width='230px'),
   ),
-  fluidRow(uiOutput("geneInfoBox")),
-  fluidRow(geneSetAnalysisBox),
+  div(class='flex',style='justify-content: space-between;',
+      createTip("Note", "The PharmacoDB biomarker set and GRCh38.p13 genome will be used automatically"),
+      
+  ),
+  #hr(), 
+  #h5(align='center', style='font-weight: bold', 'Plot Properties'),
+  br(),
+  
+  # TODO: something funny happens when pval >= 0.39 ?? consider
+  # reducing range of slider
+  div(style='display: flex', 
+      div(class='flex', style='flex-direction: column-reverse',
+          plotlyOutput("manhattanPlot", height='300px', width='700px'),
+          plotlyOutput("volcanoPlot", height='300px', width='700px'),
+      ),
+      div(style='background-color: #f1f2f6; border-radius: 0px 0px 8px 8px; margin-left: 8px',
+          p(style='background-color: #0c2461; color: white; font-family: source sans pro;
+         padding: 8px 16px; border-radius: 8px 8px 0px 0px; font-size: 24px; font-weight: bold;
+        margin-bottom: 0px', "Biomarker Info"),
+          div(style='padding: 16px',
+              uiOutput("geneInfoBox"),
+          ),
+      ),
+  ),
+  
+  hr(), 
+  h5(align='center', style='font-weight: bold', 'Gene Set Analysis'),
+  br(),
+  
+  
+  div(class='flex', style='justify-content: space-between; align-items: end;',
+      uiOutput("geneSelect"),
+      selectInput("gsType", "Gene Set Type",
+                  c("Select a gene set type..." = "", gsTypes), selected = "", width='230px'),
+      selectInput("simAlgo", "Similarity Algorithm", c("overlap"), width='230px'),
+      sliderInput("simCutoff", "Similarity Cutoff",
+                  min = 0, max = 1, value = 0.05, width='230px'),
+  ),
+  actionButton("runGsAnalysis", "Run Gene Set Analysis!"),
+  
+  uiOutput("plotError"),
+  shinybusy::use_busy_spinner(spin = "fading-circle"),
+  
+  div(style='display: flex; width: 100%;', 
+      div(style='min-width: 700px',
+          visNetwork::visNetworkOutput("networkPlot", width='700px'),
+      ),
+      div(style='background-color: #f1f2f6; border-radius: 0px 0px 8px 8px; 
+          margin-left: 8px; flex-grow:1; min-width: 0',
+          p(style='background-color: #0c2461; color: white; font-family: source sans pro;
+         padding: 8px 16px; border-radius: 8px 8px 0px 0px; font-size: 24px; font-weight: bold;
+        margin-bottom: 0px', "Gene Set Info"),
+          div(style='padding: 16px',
+              uiOutput("gsInfo")
+          ),
+      ),
+  ),
 )
 
 ### REACTIVE VALUES AND OBSERVERS ###
@@ -113,15 +118,15 @@ biomarkerTabCreateRV <- function() {
 # Return all reactive variable observers
 biomarkerTabObservers <- function(input, rv) {
   # Update biomarkerDf and chromosomeDf based on file uploads
-  observeEvent(input$biomarkerFile, {
-    req(input$biomarkerFile)
-    rv$biomarkerDf <- read.csv(input$biomarkerFile$datapath)
-  })
+  #observeEvent(input$biomarkerFile, {
+  #  req(input$biomarkerFile)
+  #  rv$biomarkerDf <- read.csv(input$biomarkerFile$datapath)
+  #})
   
-  observeEvent(input$genomeFile, {
-    req(input$genomeFile)
-    rv$chromosomeDf <- read.csv(input$genomeFile$datapath)
-  })
+  #observeEvent(input$genomeFile, {
+  #  req(input$genomeFile)
+  #  rv$chromosomeDf <- read.csv(input$genomeFile$datapath)
+  #})
   
   # Update & rerender network plot only when the runGsAnalysis button is pressed
   observeEvent(input$runGsAnalysis, {
@@ -175,26 +180,27 @@ biomarkerTabOutputUI <- function(input, rv, output) {
   output$geneSelect <- renderUI({
     geneChoices <- unique(rv$biomarkerDf$gene) #FIXME: unsafe
     selectInput("gene", "Gene", c("Select a gene..." = "", geneChoices),
-                selected = "")
+                selected = "", width='230px')
   })
   
   output$tissueSelect <- renderUI({
     tissueChoices <- unique(rv$biomarkerDf$tissue) #FIXME: unsafe
     selectInput("tissue", "Tissue", c("Select a tissue..." = "", tissueChoices),
-                selected = "")
+                selected = "", width='230px')
   })
   
   output$compoundSelect <- renderUI({
     compoundChoices <- unique(rv$biomarkerDf$compound) #FIXME: unsafe
     selectInput("compound", "Compound/Drug",
-                c("Select a compound..." = "", compoundChoices), selected = "")
+                c("Select a compound..." = "", compoundChoices), 
+                selected = "", width='230px')
   })
   
   output$mDataTypeSelect <- renderUI({
     mDataTypeChoices <- unique(rv$biomarkerDf$mDataType) #FIXME: unsafe
     selectInput("mDataType", "Molecular Data Type",
                 c("Select a molecular data type..." = "", mDataTypeChoices),
-                selected = "")
+                selected = "", width='230px')
   })
   
   # Update plots based on tissue, compound, mDataType selections
@@ -241,23 +247,16 @@ biomarkerTabOutputUI <- function(input, rv, output) {
   # Update biomarker info box in response to new selected gene
   output$geneInfoBox <- renderUI({
     req(rv$selectedGene)
-    
-    box(
-      width = 12,
-      column(
-        width = 9,
-        h3("Biomarker Info"),
-        div(tags$b("Gene: "), rv$selectedGene[1, gene]),
-        div(tags$b("Genome Position: "), rv$selectedGene[1, abs_gene_seq_start]),
-        div(tags$b("Chromosome: "), rv$selectedGene[1, chr]),
-        div(tags$b("Estimate: "), rv$selectedGene[1, estimate]),
-        div(tags$b("P-Value: "), rv$selectedGene[1, pvalue]),
-        div(tags$b("FDR: "), rv$selectedGene[1, fdr])
-      ),
-      column(
-        width = 3, br(), br(),
-        p("Click on any point to see more information about the gene."), br()
-      )
+    div(
+      
+      div(style='font-family: source sans pro', tags$b("Gene: "), rv$selectedGene[1, gene]),
+      div(style='font-family: source sans pro', tags$b("Genome Position: "), rv$selectedGene[1, abs_gene_seq_start]),
+      div(style='font-family: source sans pro', tags$b("Chromosome: "), rv$selectedGene[1, chr]),
+      div(style='font-family: source sans pro', tags$b("Estimate: "), rv$selectedGene[1, estimate]),
+      div(style='font-family: source sans pro', tags$b("P-Value: "), rv$selectedGene[1, pvalue]),
+      div(style='font-family: source sans pro', tags$b("FDR: "), rv$selectedGene[1, fdr]),
+      
+      p("Click on any point to see more information about the gene."), br(),
     )
   })
   
@@ -291,11 +290,12 @@ biomarkerTabOutputUI <- function(input, rv, output) {
     }
     
     div(div(tags$b("ID: "), gsInfo$gs_id),
-        div(tags$b("Name: "), gsInfo$gs_name),
-        div(tags$b("Source: "), gsInfo$gs_exact_source),
+        div(tags$b("Name: "), p(style='word-break: break-all;', gsInfo$gs_name)),
+        div(tags$b("Source: "), p(gsInfo$gs_exact_source)),
         div(tags$b("Description: ")),
         p(gsInfo$gs_description),
         link
     )
   })
 }
+

@@ -62,7 +62,7 @@ univariateTabOutputUI <- function (input, rv, output) {
     }
     
     biodf <- data.frame(rv$pdbBiomarkersDf)
-    future_promise( {
+    future_promise({
       df_ <- PGxVision::retrieveDiffExpressedGenes(pdf, rdf, biodf) 
       names(df_)[names(df_) == 'estimate'] <- 'correlation'
       names(df_)[names(df_) == 'percentile'] <- 'sample expression percentile'
