@@ -8,6 +8,8 @@ source('univariateTab.R')
 source('multivariateTab.R')
 source('biomarkerTab.R')
 
+### INITIALIZE VARIABLE ###
+
 # Function to initialize everything in this page
 analysisPageInitiatize <- function(input, output, navigate) {
   analysisPageRV <- analysisPageCreateRV()
@@ -20,6 +22,20 @@ analysisPageInitiatize <- function(input, output, navigate) {
   biomarkerTabInitialize(input, output)
 }
 
+geneSetsDir <- "extdata/gsets/"
+
+geneSetCategories <- c(
+  'H Hallmark gene sets',
+  'C1 Positional gene sets',
+  'C2 Curated gene sets',
+  'C3 Regulatory target gene sets',
+  'C4 Computational gene sets',
+  'C5 Ontology gene sets',
+  'C6 Oncogenic signature gene sets',
+  'C7 Immunologic signature gene sets',
+  'C8 Cell type signature gene sets'
+)
+
 ### INPUT ###
 
 # Return page UI
@@ -28,23 +44,21 @@ analysisPageUI <- container(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "css/analysisPage.css")),
   
   # Header
-  div(class='flex headerTop',
-      div(style='width: 40%; align-self: start', 
-          div(id='home', 
-              class='flex', 
-              img(style='display: inline-block;', src='./icons/home.png', height='16px', width='16px'),
-              span(style='color: white; font-weight: bold;', "Home"),
-          ),
-          uiOutput('sampleName'),
-          br(),
+  div(class='header',
+      div(id='home', 
+          class='flex', 
+          img(style='display: inline-block;', src='./icons/home.png', height='16px', width='16px'),
+          span(style='color: white; font-weight: bold;', "Home"),
       ),
-      div(style='width: 60%; border-left: 2px solid rgba(255,255,255,0.5);',
-          uiOutput('ssgsea'),
-      )
+      uiOutput('sampleName'),
+      br(), br(),
+      div( style='display:flex',
+           h5(align='left', style='color: white; margin-left: 12px;
+               display: inline-block;', 'TOP 5 ENRICHED GENE SETS'),
+           selectInput('geneSetCategory', label=NULL, geneSetCategories),
+      ),
+      uiOutput('ssgsea'),
   ),
-  div(class='headerBottom shadow', 
-      uiOutput('sampleCharacteristics'),
-      uiOutput('')),
   
   br(),
   
@@ -70,9 +84,15 @@ analysisPageObservers <- function(input, rv, output, navigate) {
   observe({
     onclick("home", navigate('home', output))
   })
+  
+  observeEvent(input$geneSetCategory, {
+    rv$geneSetCategory <- input$geneSetCategory             
+  })
 }
 
-analysisPageCreateRV <- function() { return(reactiveValues()) }
+analysisPageCreateRV <- function() { return(reactiveValues(
+  geneSetCategory=geneSetCategories[1],
+)) }
 
 ### OUTPUT ###
 
@@ -88,31 +108,31 @@ analysisPageOutputUI <- function (input, rv, output) {
   })
   
   output$ssgsea <- renderUI({
-    df <- data.frame(results)
-    topTen <- df[order(abs(df[,1])), , drop=F][1:10, , drop=F]
+    dt <- data.table::fread(input$patientDf$datapath)
+    df <- data.frame(dt[, -1], row.names=dt[[1]])
+    geneSetJSONFile <- system.file(paste0(geneSetsDir, rv$geneSetCategory, '.json'), package="PGxVision")
+    gseaResultsDf <- data.frame(PGxVision::performSSGSEA(df, geneSetJSONFile))
+    topFive <- gseaResultsDf[order(abs(gseaResultsDf[,1]), decreasing=T), , drop=F][1:5, , drop=F]
     
     returnUIRow <- function(row, index) {
       pathway <- rownames(row) 
       estimate <- formatC(as.numeric(row), format='e', digits=4)
       return(div( style='margin-bottom: 4px;',
-        span(style='color: #0c2461; border-right: 2px solid #0c2461;
-             font-weight: bold; padding-right: 3px', as.character(index)),
-        span(pathway, style='overflow-wrap: break-word; color: #0c2461'),
-        span(' '),
-        span(style='color: white; background-color: #0c2461; margin-left: 8px;
+                  span(style='color: white; border-radius: 4px;
+             font-weight: bold; padding: 1px 8px 1px 4px', as.character(index)),
+                  span(pathway, style='overflow-wrap: break-word; color: white;'),
+                  span(' '),
+                  span(style='color: white; background-color: #0c2461; margin-left: 8px;
              padding: 1px 6px; border-radius: 8px; font-weight: bold;',estimate)
       ))
     }
     
     return(
-      div(
-        h5(align='left', style='color: white; margin-left: 12px', 'ENRICHED GENE SETS'),
-        div(style='margin: 8px 12px; padding: 8px; background-color: white; 
-          border-radius: 8px; color: white;',
-            Map(returnUIRow, split(topTen, seq_len(nrow(topTen))), 1:10),
-            p(style='text-decoration: underline; color: #0c2461; font-weight: bold; 
-      border-radius: 8px; padding: 3px 8px;', align='right', "Learn more")
-        )
+      div(class='gseaPane',
+          Map(returnUIRow, split(topFive, seq_len(nrow(topFive))), 1:5),
+          p(style='text-decoration: underline; color: white; font-weight: bold;
+              margin-right: 8px',
+            align='right', "Learn more")
       )
     )
   })

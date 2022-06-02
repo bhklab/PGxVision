@@ -1,16 +1,10 @@
-.headerTop {
+.header {
   background-color: #0c2461; 
   width: 100%; 
-  padding: 32px 16px;
+  padding: 16px;
   margin-top: 16px; 
-  border-radius: 8px 8px 0px 0px;
+  border-radius: 8px;
   align-items: flex-start;
-}
-
-.headerBottom {
-  background-color: rgb(37,58,113); 
-  border-radius: 0px 0px 8px 8px;
-  padding: 8px;
 }
 
 .sampleName {
@@ -21,7 +15,42 @@
   padding: 8px 12px; 
   border-radius: 8px;
   border: 2px dashed rgba(255,255,255,0.2);
-  
+}
+
+.gseaPane {
+  padding: 8px; 
+  background-color: rgb(37,58,113); 
+  border-radius: 8px; 
+  color: white;
+}
+
+.selectize-input {
+  margin: 0px 12px; 
+  font-size: 11pt;
+  background-color: blue;
+  border-radius: 20px !important;
+  font-family: Source Sans Pro;
+  background-color: rgb(37,58,113) !important;
+  border-width: 0px !important;
+  color: white !important;
+}
+
+.shiny-input-container {
+  margin: 0px; 
+  padding: 0px;
+}
+
+
+.selectize-input::after {
+  border-color: white transparent transparent transparent !important;
+}
+
+.selectize-input.dropdown-active::after {
+   border-color: transparent transparent white transparent !important;
+}
+
+.selectize-dropdown {
+  margin-left: 12px !important;
 }
 
 #home {
