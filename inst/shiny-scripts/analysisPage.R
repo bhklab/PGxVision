@@ -2,6 +2,7 @@
 source('components/tip.R')
 source('components/characteristic.R')
 source('components/container.R')
+source('components/gseaRow.R')
 
 ### IMPORT PAGES AND UI ###
 source('univariateTab.R')
@@ -42,6 +43,7 @@ geneSetCategories <- c(
 analysisPageUI <- container(
   # Set headers
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "css/analysisPage.css")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "css/app.css")),
   
   # Header
   div(class='header',
@@ -51,10 +53,9 @@ analysisPageUI <- container(
           span(style='color: white; font-weight: bold;', "Home"),
       ),
       uiOutput('sampleName'),
-      br(), br(),
-      div( style='display:flex',
-           h5(align='left', style='color: white; margin-left: 12px;
-               display: inline-block;', 'TOP 5 ENRICHED GENE SETS'),
+      br(), 
+      div(class='geneSetHeader', style='display:flex',
+           h5(align='left', style='color: white; display: inline-block;', 'TOP 5 ENRICHED GENE SETS'),
            selectInput('geneSetCategory', label=NULL, geneSetCategories),
       ),
       uiOutput('ssgsea'),
@@ -117,32 +118,14 @@ analysisPageOutputUI <- function (input, rv, output) {
     returnUIRow <- function(row, index) {
       pathway <- rownames(row) 
       estimate <- formatC(as.numeric(row), format='e', digits=4)
-      return(div( style='margin-bottom: 4px;',
-                  span(style='color: white; border-radius: 4px;
-             font-weight: bold; padding: 1px 8px 1px 4px', as.character(index)),
-                  span(pathway, style='overflow-wrap: break-word; color: white;'),
-                  span(' '),
-                  span(style='color: white; background-color: #0c2461; margin-left: 8px;
-             padding: 1px 6px; border-radius: 8px; font-weight: bold;',estimate)
-      ))
+      return(gseaRow(index, pathway, estimate))
     }
     
     return(
       div(class='gseaPane',
           Map(returnUIRow, split(topFive, seq_len(nrow(topFive))), 1:5),
-          p(style='text-decoration: underline; color: white; font-weight: bold;
-              margin-right: 8px',
-            align='right', "Learn more")
+          p(id='learnMore', align='right', "Learn more")
       )
     )
-  })
-  
-  output$sampleCharacteristics <- renderUI({
-    return(
-      div(class='flex',
-          createCharacteristic("47", "Random Interesting Fact", '#0c2461', '#0c2461'),
-          createCharacteristic("23", "Random Crazy Fact", '#0c2461', '#0c2461'),
-          createCharacteristic("536", "Really Insane Fact", '#0c2461', '#0c2461'),
-      ))
   })
 }
