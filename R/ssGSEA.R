@@ -26,5 +26,8 @@ performSSGSEA <- function(patientDf, geneSetsJSON) {
                    min.sz=1,
                    verbose=FALSE)
   
-  return(estimate)
+  # Also get a column of the actual list of genes in every gene set
+  genes <- vapply(rownames(estimate), \(x) paste0(jsonData[["genesets"]][[x]], collapse=", "), character(1))
+  
+  return(cbind(estimate, genes))
 }

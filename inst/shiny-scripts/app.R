@@ -10,6 +10,7 @@ library(shinyalert)
 library(shinybusy)
 library(msigdbr)
 library(GSVA)
+library(DT)
 plan(multisession)
 
 # Import files for each page

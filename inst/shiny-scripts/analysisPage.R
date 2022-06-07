@@ -18,7 +18,7 @@ analysisPageInitiatize <- function(input, output, navigate) {
   analysisPageOutputUI(input, analysisPageRV, output)
   
   # Initialize sub-tabs
-  univariateTabInitialize(input, output)
+  univariateTabInitialize(input, output, analysisPageRV)
   multivariateTabInitialize(input, output)
   biomarkerTabInitialize(input, output)
 }
@@ -70,7 +70,7 @@ analysisPageUI <- container(
                   tabPanel('Univariate', univariateTabUI),
                   tabPanel('Multivariate', multivariateTabUI))),
   
-  br(), br(), br(), 
+  br(), br(),  
   
   # Biomarker Analysis
   h5("Biomarker Analysis", align='left'),
@@ -93,6 +93,7 @@ analysisPageObservers <- function(input, rv, output, navigate) {
 
 analysisPageCreateRV <- function() { return(reactiveValues(
   geneSetCategory=geneSetCategories[1],
+  ssGseaResults=NULL,
 )) }
 
 ### OUTPUT ###
@@ -113,12 +114,15 @@ analysisPageOutputUI <- function (input, rv, output) {
     df <- data.frame(dt[, -1], row.names=dt[[1]])
     geneSetJSONFile <- system.file(paste0(geneSetsDir, rv$geneSetCategory, '.json'), package="PGxVision")
     gseaResultsDf <- data.frame(PGxVision::performSSGSEA(df, geneSetJSONFile))
-    topFive <- gseaResultsDf[order(abs(gseaResultsDf[,1]), decreasing=T), , drop=F][1:5, , drop=F]
+    gseaResultsDf <- gseaResultsDf[order(abs(as.numeric(gseaResultsDf[,1])), decreasing=T), , drop=F]
+    rv$ssGseaResults <- gseaResultsDf
+    topFive <- gseaResultsDf[1:5, , drop=F]
     
     returnUIRow <- function(row, index) {
       pathway <- rownames(row) 
-      estimate <- formatC(as.numeric(row), format='e', digits=4)
-      return(gseaRow(index, pathway, estimate))
+      estimate <- formatC(as.numeric(row[1]), format='e', digits=4)
+      genes <- row[2]
+      return(gseaRow(index, pathway, estimate, genes))
     }
     
     return(
