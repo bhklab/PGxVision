@@ -8,7 +8,7 @@ based on genes with expression >90th percentile and <10th percentile.}
 retrieveDiffExpressedGenes(patientDF, referenceDF, biomarkerDF)
 }
 \arguments{
-\item{patientDF}{`data.frame` Patient sample gene expression table, where 
+\item{patientDF}{`data.frame` Patient sample gene expression table, where
 rownames are genes and only one column is present for the expression of each gene}
 
 \item{referenceDF}{`data.frame` where rows are features (i.e. genes), columns

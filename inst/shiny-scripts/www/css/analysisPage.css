@@ -1,0 +1,76 @@
+.sampleName {
+  color: white; 
+  font-weight: 900; 
+  display: inline-block;
+  background-color: rgba(255,255,255,0.1); 
+  padding: 8px 12px; 
+  border-radius: 8px;
+  border: 2px dashed rgba(255,255,255,0.2);
+}
+
+.header {
+  background-color: #0c2461; 
+  width: 100%; 
+  padding: 16px;
+  margin-top: 16px; 
+  border-radius: 8px;
+  align-items: flex-start;
+  color: white;
+}
+
+.gseaPane {
+  padding: 8px; 
+  background-color: rgb(37,58,113); 
+  border-radius: 8px; 
+  color: white;
+}
+
+.geneSetHeader .selectize-input {
+  margin: 0px 12px; 
+  font-size: 11pt;
+  background-color: blue;
+  border-radius: 20px !important;
+  font-family: Source Sans Pro;
+  background-color: rgb(37,58,113) !important;
+  border-width: 0px !important;
+  color: white !important;
+}
+
+.geneSetHeader .shiny-input-container {
+  margin: 0px; 
+  padding: 0px;
+}
+
+.geneSetHeader .selectize-input::after {
+  border-color: white transparent transparent transparent !important;
+}
+
+.geneSetHeader .selectize-input.dropdown-active::after {
+   border-color: transparent transparent white transparent !important;
+}
+
+.geneSetHeader .selectize-dropdown {
+  margin-left: 12px !important;
+}
+
+#learnMore {
+  text-decoration: underline; 
+  color: white; 
+  font-weight: bold;
+  margin-right: 8px
+}
+
+#home {
+  background-color: rgb(37,58,113); 
+  border-radius: 8px; 
+  width: 74px; 
+  padding: 2px 8px;
+  height: 26px; 
+  cursor: pointer; 
+  align-items: center; 
+  justify-content: space-between;
+}
+
+#home:hover {
+  background-color: #324f9a; 
+}

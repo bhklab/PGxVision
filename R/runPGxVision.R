@@ -19,9 +19,9 @@
 #'
 #' @importFrom shiny runApp
 #' @export
-runPGxVision <- function() {
+runPGxVision <- function(...) {
   appDir <- system.file("shiny-scripts", package = "PGxVision")
-  shiny::runApp(appDir, display.mode = "normal")
+  shiny::runApp(appDir, ...)
   return(invisible(NULL))
 }
 

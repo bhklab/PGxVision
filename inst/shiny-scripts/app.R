@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyjs)
 library(plotly)
 library(magrittr)
 library(jsonlite)
@@ -7,40 +8,51 @@ library(promises)
 library(future)
 library(shinyalert)
 library(shinybusy)
+library(msigdbr)
+library(GSVA)
+library(DT)
 plan(multisession)
 
 # Import files for each page
 source ('uploadPage.R')
 source ('analysisPage.R')
+source ('drugTreatmentPage.R')
 
 # Change options for this session
 opts <- options()
 options(shiny.maxRequestSize=250*1024^2) # max upload of 250 MB
 on.exit(options(opts))
 
+# Navigation function
+navigate <- function(newPage, output) {
+  output$app <- renderUI({
+    switch(newPage,
+           home={return(uploadPageUI)},
+           analysis={return(analysisPageUI)},
+           treatment={return(drugTreatmentPageUI)}) 
+  })
+}
+
 ui <- fluidPage(
-  conditionalPanel(condition='output.patientDfUploaded == false', 
-                   uploadPageUI(uploadedFileId="patientDf")),
-  conditionalPanel(condition='output.patientDfUploaded == true', analysisPageUI),
+  # Import app level CSS
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "css/app.css")),
   
-  # Bottom text
+  useShinyjs(),
+  uiOutput('app'),
+  
+  # Footer
   br(),
   p("© BHK Lab 2021-2022", align='center')
 )
 
-server <- function(input, output) {
-  
+server <- function(input, output, session) {
   # Logic to render different pages
-  output$patientDfUploaded <- reactive({FALSE})
-  outputOptions(output, 'patientDfUploaded', suspendWhenHidden=FALSE)
-  
-  observeEvent(input$patientDf, {
-    req(input$patientDf)
-    output$patientDfUploaded <- reactive({TRUE})
-  })
+  navigate('home', output)
   
   # Initialize pages
-  analysisPageInitiatize(input, output)
+  uploadPageInitialize(input, output, navigate)
+  analysisPageInitiatize(input, output, navigate)
+  drugTreatmentPageInitiatize(input, output, navigate)
 }
 
 shinyApp(ui, server)

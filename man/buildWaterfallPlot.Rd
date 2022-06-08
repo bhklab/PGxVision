@@ -33,13 +33,13 @@ continuous axis, drugResponseDf$colorCol should be a vector of type
 "numeric". If no column is provided, it will default to the
 drugSensitivityCol.}
 
-\item{xLabel}{(optional) The label for the x-axis. Defaults to <xAxisCol>.}
+\item{xLabel}{(optional) The label for the x-axis. Defaults to \verb{<xAxisCol>}.}
 
 \item{yLabel}{(optional) The label for the y-axis. Defaults to
-<drugSensitivityCol>.}
+\verb{<drugSensitivityCol>}.}
 
 \item{title}{(optional) The title for the plot. Defaults to
-'<drugSensitivityCol> vs. <xAxisCol>'}
+'\verb{<drugSensitivityCol>} vs. \verb{<xAxisCol>}'}
 }
 \value{
 A ggplot2 plot object mapping the drug sensitivity metrics against

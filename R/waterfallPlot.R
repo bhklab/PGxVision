@@ -26,11 +26,11 @@
 #' continuous axis, drugResponseDf$colorCol should be a vector of type
 #' "numeric". If no column is provided, it will default to the
 #' drugSensitivityCol.
-#' @param xLabel (optional) The label for the x-axis. Defaults to <xAxisCol>.
+#' @param xLabel (optional) The label for the x-axis. Defaults to `<xAxisCol>`.
 #' @param yLabel (optional) The label for the y-axis. Defaults to
-#' <drugSensitivityCol>.
+#' `<drugSensitivityCol>`.
 #' @param title (optional) The title for the plot. Defaults to
-#' '<drugSensitivityCol> vs. <xAxisCol>'
+#' '`<drugSensitivityCol>` vs. `<xAxisCol>`'
 #'
 #' @return A ggplot2 plot object mapping the drug sensitivity metrics against
 #' the xAxisCol, sorted in descending order by drug sensitivity and colored by
