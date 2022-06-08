@@ -4,7 +4,7 @@
 \alias{runPGxVision}
 \title{Launch the PGxVision Shiny app}
 \usage{
-runPGxVision()
+runPGxVision(...)
 }
 \value{
 No return value; open up a shiny page
