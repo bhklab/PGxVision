@@ -15,15 +15,15 @@ univariateTabInitialize <- function(input, output, globalRV) {
 univariateTabUI <- div(
   br(),
   div(class='flex', style='align-items: stretch',
-      div(style='width: 35%', 
-        p("Please upload your reference population file"),
-        fileInput("referencePopulationDf",
-                  "",
-                  accept=c("text/csv", ".csv"), buttonLabel="Browse files"),
-        createTip("Tip", "File format must be .csv"),
+      div(style='width: 33%', 
+          # p("Please upload your reference population file"),
+          fileInput("referencePopulationDf",
+                    "",
+                    accept=c("text/csv", ".csv"), buttonLabel="Browse files"),
+          createTip("Tip", "File format must be .csv"),
       ),
-      div(style='width: 65%; border-left: 1px solid gray; padding: 8px;', 
-        uiOutput('selectedRow'),
+      div(style='width: 67%; background-color: #ecf0f1; border-radius: 8px; padding: 8px;', 
+          uiOutput('selectedRow'),
       )
   ),
   br(),
@@ -62,7 +62,7 @@ univariateTabObservers <- function(input, rv) {
 #Return all output objects
 univariateTabOutputUI <- function (input, rv, output, globalRV) {
   output$selectedRow <- renderUI({
-    if (identical(rv$univarResultsDf, NULL)) { return(div()) }
+    if (identical(rv$univarResultsDf, NULL)) { return(p("Please upload your reference population file.")) }
     else {
       index <- input$pdbBiomarkers_rows_selected
       if (identical(index, NULL)) { return(p("Select a row to learn more."))}
@@ -70,14 +70,29 @@ univariateTabOutputUI <- function (input, rv, output, globalRV) {
       # Find reevant pathways 
       gene <- rv$univarResultsDf[index,]$gene_symbol
       relevantPathways <- globalRV$ssGseaResults[grepl(pattern=gene, globalRV$ssGseaResults$genes), ]
-      
+
       return(
-        div(
-          
-          p(index),
-          p(gene),
-          p(globalRV$geneSetCategory),
-          lapply(rownames(relevantPathways), \(x) { return (p(x))})
+        div(style='display: flex;',
+            div(style='width: 40%;',
+              div(span(style='font-weight: bold', "Gene"), span(gene)),
+              div(span(style='font-weight: bold', "Gene Set Category"), span(globalRV$geneSetCategory)),
+              div(span(style='font-weight: bold', 'Enriched Pathways')),
+              div(style='display: flex; flex-wrap: wrap;',
+                  lapply(rownames(relevantPathways), \(x) { 
+                    return (
+                      div(style='background-color: white; padding: 1px 8px; word-wrap: break-word;
+                      border-radius: 15px; margin: 2px 4px 2px 0px; display: inline-block',
+                          span(x)
+                      ))})
+              ),
+            ),
+            div(style='width: 60%; height: 200px; border-radius: 8px; overflow: hidden;
+                background-color: white;',
+                renderPlot(PGxVision::densityPlotBiomarkerPercentile(
+                  gene, # the gene of interest (string)
+                  rv$patientDf[gene, ], # the patient's expression for the gene chosen (float)
+                  rv$referenceDf), height=200)
+            )
         ))
     }})
   
