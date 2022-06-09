@@ -12,13 +12,13 @@ source('biomarkerTab.R')
 ### INITIALIZE VARIABLE ###
 
 # Function to initialize everything in this page
-analysisPageInitiatize <- function(input, output, navigate) {
+analysisPageInitiatize <- function(input, output, navigate, globalRV) {
   analysisPageRV <- analysisPageCreateRV()
   analysisPageObservers(input, analysisPageRV, output, navigate)
-  analysisPageOutputUI(input, analysisPageRV, output)
+  analysisPageOutputUI(input, analysisPageRV, output, globalRV)
   
   # Initialize sub-tabs
-  univariateTabInitialize(input, output, analysisPageRV)
+  univariateTabInitialize(input, output, analysisPageRV, globalRV)
   multivariateTabInitialize(input, output)
   biomarkerTabInitialize(input, output)
 }
@@ -55,7 +55,7 @@ analysisPageUI <- container(
       uiOutput('sampleName'),
       br(), 
       div(class='geneSetHeader', style='display:flex',
-           h5(align='left', style='color: white; display: inline-block;', 'TOP 5 ENRICHED GENE SETS'),
+           h5(align='left', style='color: white; display: inline-block;', 'TOP 5 ENRICHED GENE SETS FOR UPLOADED SAMPLE'),
            selectInput('geneSetCategory', label=NULL, geneSetCategories),
       ),
       uiOutput('ssgsea'),
@@ -92,14 +92,14 @@ analysisPageObservers <- function(input, rv, output, navigate) {
 }
 
 analysisPageCreateRV <- function() { return(reactiveValues(
-  geneSetCategory=geneSetCategories[1],
+  geneSetCategory=geneSetCategories[7],
   ssGseaResults=NULL,
 )) }
 
 ### OUTPUT ###
 
 #Return all output objects
-analysisPageOutputUI <- function (input, rv, output) {
+analysisPageOutputUI <- function (input, rv, output, globalRV) {
   output$sampleName <- renderUI({
     return(div(
       h5(align='center', style='color: white; margin-bottom: 0px', 'SAMPLE'),
@@ -110,10 +110,9 @@ analysisPageOutputUI <- function (input, rv, output) {
   })
   
   output$ssgsea <- renderUI({
-    dt <- data.table::fread(input$patientDf$datapath)
-    df <- data.frame(dt[, -1], row.names=dt[[1]])
     geneSetJSONFile <- system.file(paste0(geneSetsDir, rv$geneSetCategory, '.json'), package="PGxVision")
-    gseaResultsDf <- data.frame(PGxVision::performSSGSEA(df, geneSetJSONFile))
+    gseaResults <- PGxVision::performSSGSEA(globalRV$patientDf, geneSetJSONFile)
+    gseaResultsDf <- data.frame(gseaResults$results)
     gseaResultsDf <- gseaResultsDf[order(abs(as.numeric(gseaResultsDf[,1])), decreasing=T), , drop=F]
     rv$ssGseaResults <- gseaResultsDf
     topFive <- gseaResultsDf[1:5, , drop=F]
@@ -122,7 +121,8 @@ analysisPageOutputUI <- function (input, rv, output) {
       pathway <- rownames(row) 
       estimate <- formatC(as.numeric(row[1]), format='e', digits=4)
       genes <- row[2]
-      return(gseaRow(index, pathway, estimate, genes))
+      title <- gseaResults[['descriptions']][[pathway]]
+      return(gseaRow(title, index, pathway, estimate, genes))
     }
     
     return(

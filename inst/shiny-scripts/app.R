@@ -46,12 +46,15 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
+  
+  globalRV <- reactiveValues(patientDf=NULL)
+  
   # Logic to render different pages
   navigate('home', output)
   
   # Initialize pages
-  uploadPageInitialize(input, output, navigate)
-  analysisPageInitiatize(input, output, navigate)
+  uploadPageInitialize(input, output, navigate, globalRV)
+  analysisPageInitiatize(input, output, navigate, globalRV)
   drugTreatmentPageInitiatize(input, output, navigate)
 }
 

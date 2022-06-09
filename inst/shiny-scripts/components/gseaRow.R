@@ -1,6 +1,6 @@
-gseaRow <- function(index, pathway, estimate, genes) {
+gseaRow <- function(title, index, pathway, estimate, genes) {
   return(
-    div( style='margin-bottom: 4px; white-space: nowrap; overflow: hidden;',
+    div(title=title, style='margin-bottom: 4px; white-space: nowrap; overflow: hidden;',
          span(style='color: white; border-radius: 4px;    
              font-weight: bold; padding: 1px 8px 1px 4px', as.character(index)),
          span(pathway, style='overflow-wrap: break-word; color: white; font-weight: bold;'),
