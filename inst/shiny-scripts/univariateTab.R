@@ -2,10 +2,10 @@
 source('components/tip.R')
 
 # Function to initialize everything in this page
-univariateTabInitialize <- function(input, output, analysisPageRV, globalRV) {
+univariateTabInitialize <- function(input, output, globalRV) {
   univariateTabRV <- univariateTabCreateRV()
-  univariateTabObservers(input, univariateTabRV)
-  univariateTabOutputUI(input, univariateTabRV, output, analysisPageRV, globalRV)
+  univariateTabObservers(input, univariateTabRV, globalRV)
+  univariateTabOutputUI(input, univariateTabRV, output, globalRV)
 }
 
 
@@ -48,16 +48,16 @@ univariateTabCreateRV <- function() {
 
 
 # Return all reactive variable observers
-univariateTabObservers <- function(input, rv) {
+univariateTabObservers <- function(input, rv, globalRV) {
   observeEvent(input$referencePopulationDf, {
     req(input$referencePopulationDf)
     df1 <- data.table::fread(input$referencePopulationDf$datapath)
-    rv$referenceDf <- data.frame(df1[, -1], row.names=df1[[1]])
+    globalRV$referenceDf <- data.frame(df1[, -1], row.names=df1[[1]])
   })
 }
 
 #Return all output objects
-univariateTabOutputUI <- function (input, rv, output, analysisPageRV, globalRV) {
+univariateTabOutputUI <- function (input, rv, output, globalRV) {
   output$selectedRow <- renderUI({
     if (identical(rv$univarResultsDf, NULL)) { return(p("Please upload your reference population file.")) }
     else {
@@ -66,20 +66,21 @@ univariateTabOutputUI <- function (input, rv, output, analysisPageRV, globalRV) 
 
       # Find reevant pathways
       gene <- rv$univarResultsDf[index,]$gene_symbol
-      relevantPathways <- analysisPageRV$ssGseaResults[grepl(pattern=gene, analysisPageRV$ssGseaResults$genes), ]
+      relevantPathways <- globalRV$ssGseaResults[grepl(pattern=gene, globalRV$ssGseaResults$genes), ]
 
       return(
         div(style='display: flex;',
-            div(style='width: 40%;',
+            div(style='width: 38%; overflow: wrap;padding-right: 4px; ',
               div(span(style='font-weight: bold', "Gene"), span(gene)),
-              div(span(style='font-weight: bold', "Gene Set Category"), span(analysisPageRV$geneSetCategory)),
+              div(span(style='font-weight: bold', "Gene Set Category"), span(globalRV$geneSetCategory)),
               div(span(style='font-weight: bold', 'Enriched Pathways')),
-              div(style='display: flex; flex-wrap: wrap;',
+              div(style='display: flex; flex-wrap: wrap; overflow: wrap; ',
                   lapply(rownames(relevantPathways), \(x) {
                     return (
-                      div(style='background-color: white; padding: 1px 8px; word-wrap: break-word;
-                      border-radius: 15px; margin: 2px 4px 2px 0px; display: inline-block',
-                          span(x)
+                      div(style='background-color: white; padding: 1px 8px; width: 100%; overflow: wrap;
+                      border-radius: 15px; margin: 2px 0px 2px 0px; display: inline-block; 
+                          word-wrap: break-word;',
+                          span(style='word-wrap: break-word;',x)
                       ))})
               ),
             ),
@@ -88,14 +89,14 @@ univariateTabOutputUI <- function (input, rv, output, analysisPageRV, globalRV) 
                 renderPlot(PGxVision::densityPlotBiomarkerPercentile(
                   gene, # the gene of interest (string)
                   globalRV$patientDf[gene, ], # the patient's expression for the gene chosen (float)
-                  rv$referenceDf), height=200)
+                  globalRV$referenceDf), height=200)
             )
         ))
     }})
 
   output$pdbBiomarkers <- DT::renderDataTable({
     pdf <- globalRV$patientDf
-    rdf <- rv$referenceDf
+    rdf <- globalRV$referenceDf
     biodf <- data.frame(rv$pdbBiomarkersDf)
 
     # Return empty table if files not uploaded

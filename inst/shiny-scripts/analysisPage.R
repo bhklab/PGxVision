@@ -14,11 +14,11 @@ source('biomarkerTab.R')
 # Function to initialize everything in this page
 analysisPageInitiatize <- function(input, output, navigate, globalRV) {
   analysisPageRV <- analysisPageCreateRV()
-  analysisPageObservers(input, analysisPageRV, output, navigate)
-  analysisPageOutputUI(input, analysisPageRV, output, globalRV)
+  analysisPageObservers(input, analysisPageRV, output, navigate, globalRV)
+  analysisPageOutputUI(input, analysisPageRV, output, navigate, globalRV)
   
   # Initialize sub-tabs
-  univariateTabInitialize(input, output, analysisPageRV, globalRV)
+  univariateTabInitialize(input, output, globalRV)
   multivariateTabInitialize(input, output)
   biomarkerTabInitialize(input, output)
 }
@@ -48,15 +48,15 @@ analysisPageUI <- container(
   # Header
   div(class='header',
       div(id='home', 
-          class='flex', 
+          class='flex headerButton', 
           img(style='display: inline-block;', src='./icons/home.png', height='16px', width='16px'),
           span(style='color: white; font-weight: bold;', "Home"),
       ),
       uiOutput('sampleName'),
       br(), 
       div(class='geneSetHeader', style='display:flex',
-           h5(align='left', style='color: white; display: inline-block;', 'TOP 5 ENRICHED GENE SETS FOR UPLOADED SAMPLE'),
-           selectInput('geneSetCategory', label=NULL, geneSetCategories),
+          h5(align='left', style='color: white; display: inline-block;', 'TOP 5 ENRICHED GENE SETS FOR UPLOADED SAMPLE'),
+          selectInput('geneSetCategory', label=NULL, geneSetCategories),
       ),
       uiOutput('ssgsea'),
   ),
@@ -81,10 +81,13 @@ analysisPageUI <- container(
 
 ### REACTIVE VALUES AND OBSERVERS ###
 
-analysisPageObservers <- function(input, rv, output, navigate) {
-  observe({
-    onclick("home", navigate('home', output))
+analysisPageObservers <- function(input, rv, output, navigate, globalRV) {
+  observe({ onclick("home", {
+    globalRV$referenceDf <- NULL
+    navigate('home', output)
   })
+  })
+  observe({ onclick("learnMore", navigate('ssGSEA', output)) })
   
   observeEvent(input$geneSetCategory, {
     rv$geneSetCategory <- input$geneSetCategory             
@@ -93,13 +96,12 @@ analysisPageObservers <- function(input, rv, output, navigate) {
 
 analysisPageCreateRV <- function() { return(reactiveValues(
   geneSetCategory=geneSetCategories[7],
-  ssGseaResults=NULL,
 )) }
 
 ### OUTPUT ###
 
 #Return all output objects
-analysisPageOutputUI <- function (input, rv, output, globalRV) {
+analysisPageOutputUI <- function (input, rv, output, navigate, globalRV) {
   output$sampleName <- renderUI({
     return(div(
       h5(align='center', style='color: white; margin-bottom: 0px', 'SAMPLE'),
@@ -114,7 +116,8 @@ analysisPageOutputUI <- function (input, rv, output, globalRV) {
     gseaResults <- PGxVision::performSSGSEA(globalRV$patientDf, geneSetJSONFile)
     gseaResultsDf <- data.frame(gseaResults$results)
     gseaResultsDf <- gseaResultsDf[order(abs(as.numeric(gseaResultsDf[,1])), decreasing=T), , drop=F]
-    rv$ssGseaResults <- gseaResultsDf
+    globalRV$ssGseaMetadata <- gseaResults$descriptions
+    globalRV$ssGseaResults <- gseaResultsDf[gseaResultsDf[,1] > 0.4,]
     topFive <- gseaResultsDf[1:5, , drop=F]
     
     returnUIRow <- function(row, index) {

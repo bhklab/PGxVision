@@ -9,7 +9,7 @@ pdxFile <- system.file(paste0(sampleDataDir, "sampleTreatmentResponse.csv"),
 brcaPdxePaxlitaxelResponse <- read.csv(pdxFile)
 
 # Function to initialize everything in this page
-drugTreatmentPageInitiatize <- function(input, output, navigate) {
+drugTreatmentPageInitiatize <- function(input, output, navigate, globalRV) {
   drugTreatmentPageRV <- drugTreatmentPageCreateRV()
   drugTreatmentPageObservers(input, drugTreatmentPageRV, output, navigate)
   drugTreatmentPageOutputUI(input, drugTreatmentPageRV, output)

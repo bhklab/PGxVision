@@ -17,6 +17,7 @@ plan(multisession)
 source ('uploadPage.R')
 source ('analysisPage.R')
 source ('drugTreatmentPage.R')
+source ('gseaReportPage.R')
 
 # Change options for this session
 opts <- options()
@@ -29,8 +30,9 @@ navigate <- function(newPage, output) {
     switch(newPage,
            home={return(uploadPageUI)},
            analysis={return(analysisPageUI)},
-           treatment={return(drugTreatmentPageUI)}) 
-  })
+           treatment={return(drugTreatmentPageUI)},
+           ssGSEA={return(gseaReportPageUI)},
+    )})
 }
 
 ui <- fluidPage(
@@ -47,7 +49,12 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  globalRV <- reactiveValues(patientDf=NULL)
+  globalRV <- reactiveValues(
+    patientDf=NULL,
+    referenceDf=NULL,
+    ssGseaResults=NULL,
+    ssGseaMetadata=NULL,
+  )
   
   # Logic to render different pages
   navigate('home', output)
@@ -55,7 +62,8 @@ server <- function(input, output, session) {
   # Initialize pages
   uploadPageInitialize(input, output, navigate, globalRV)
   analysisPageInitiatize(input, output, navigate, globalRV)
-  drugTreatmentPageInitiatize(input, output, navigate)
+  drugTreatmentPageInitiatize(input, output, navigate, globalRV)
+  gseaReportPageInitiatize(input, output, navigate, globalRV)
 }
 
 shinyApp(ui, server)
