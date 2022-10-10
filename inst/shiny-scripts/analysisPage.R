@@ -114,8 +114,6 @@ analysisPageOutputUI <- function (input, rv, output, navigate, globalRV) {
   output$ssgsea <- renderUI({
     geneSetJSONFile <- system.file(paste0(geneSetsDir, rv$geneSetCategory, '.json'), package="PGxVision")
     gseaResults <- PGxVision::performSSGSEA(globalRV$patientDf, geneSetJSONFile)
-    View(gseaResults)
-    print(typeof(gseaResults))
     gseaResultsDf <- data.frame(gseaResults$results)
     gseaResultsDf <- gseaResultsDf[order(abs(as.numeric(gseaResultsDf[,1])), decreasing=T), , drop=F]
     globalRV$ssGseaMetadata <- gseaResults$descriptions
