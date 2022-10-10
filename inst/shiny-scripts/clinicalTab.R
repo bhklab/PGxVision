@@ -89,7 +89,7 @@ clinicalTabOutputUI <- function (input, rv, output) {
     future_promise({
       featureChoices <- unique(row.names(pdf))
       return(selectizeInput("feature", "Feature", c("Select a feature..." = "",
-                                                 featureChoices), selected="ERBB2"))
+                                                    featureChoices), selected="ERBB2"))
     })
   })
   

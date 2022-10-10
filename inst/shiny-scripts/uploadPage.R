@@ -2,9 +2,9 @@
 source('components/tip.R')
 
 # Function to initialize everything in this page
-uploadPageInitialize <- function(input, output, navigate) {
+uploadPageInitialize <- function(input, output, navigate, globalRV) {
   uploadPageRV <- uploadPageCreateRV()
-  uploadPageObservers(input, uploadPageRV, output, navigate)
+  uploadPageObservers(input, uploadPageRV, output, navigate, globalRV)
 }
 
 ### INPUT ###
@@ -56,9 +56,11 @@ uploadPageCreateRV <- function() {
 }
 
 # Return all reactive variable observers
-uploadPageObservers <- function(input, rv, output, navigate) {
+uploadPageObservers <- function(input, rv, output, navigate, globalRV) {
   observeEvent(input$patientDf, {
     req(input$patientDf)
+    df_ <- data.table::fread(input$patientDf$datapath)
+    globalRV$patientDf <- data.frame(df_[, -1], row.names=df_[[1]])
     navigate('analysis', output)
   })
   

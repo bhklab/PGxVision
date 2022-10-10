@@ -22,14 +22,21 @@ retrieveDiffExpressedGenes <- function(patientDF, referenceDF, biomarkerDF) {
   overexpressed <- percentiles[percentiles >= 0.9]
   underexpressed <- percentiles[percentiles <= 0.1]
 
-  #TODO: automatically detect whether the clinician is uploading a sample that uses simple gene IDs or
-  #ENSEMBL IDs
+  ##TODO:: automatically detect whether the clinician is uploading a sample that
+  ##uses simple gene IDs or ENSEMBL IDs
 
-  subsetOver = biomarkerDF[( biomarkerDF$estimate > 0 & biomarkerDF$gene_symbol %in% names(overexpressed)), ]
-  subsetUnder = biomarkerDF[(biomarkerDF$estimate < 0 & biomarkerDF$gene_symbol %in% names(underexpressed)), ]
+  subsetOver = biomarkerDF[
+    biomarkerDF$gene_symbol %in% names(overexpressed),
+  ]
+  subsetUnder = biomarkerDF[
+    biomarkerDF$gene_symbol %in% names(underexpressed),
+  ]
 
   subsetOver$percentile <- overexpressed[subsetOver[["gene_symbol"]]]
   subsetUnder$percentile <- underexpressed[subsetUnder[['gene_symbol']]]
+
+  subsetOver$score <- subsetOver$estimate * unlist(subsetOver$percentile)
+  subsetUnder$score <- subsetUnder$estimate * (1 - unlist(subsetUnder$percentile))
 
   return(rbind(subsetOver, subsetUnder))
 }

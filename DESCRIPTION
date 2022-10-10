@@ -43,7 +43,7 @@ Description: This is a generic plotting package meant to provide an easy way
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Imports:
     checkmate,
     data.table,
