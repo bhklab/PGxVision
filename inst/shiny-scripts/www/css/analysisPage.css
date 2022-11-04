@@ -60,7 +60,12 @@
   margin-right: 8px
 }
 
-#home {
+#learnMore:hover {
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+}
+
+.headerButton {
   background-color: rgb(37,58,113); 
   border-radius: 8px; 
   width: 74px; 
@@ -71,6 +76,7 @@
   justify-content: space-between;
 }
 
-#home:hover {
+
+.headerButton:hover {
   background-color: #324f9a; 
 }

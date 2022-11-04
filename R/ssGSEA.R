@@ -18,6 +18,7 @@
 performSSGSEA <- function(patientDf, geneSetsJSON) {
   jsonData <- fromJSON(geneSetsJSON)
   geneSetName <- jsonData$name
+  geneSetDescriptions <- jsonData$descriptions
   geneSetList <- jsonData$genesets
   
   estimate <- gsva(expr=data.matrix(patientDf), 
@@ -29,5 +30,5 @@ performSSGSEA <- function(patientDf, geneSetsJSON) {
   # Also get a column of the actual list of genes in every gene set
   genes <- vapply(rownames(estimate), \(x) paste0(jsonData[["genesets"]][[x]], collapse=", "), character(1))
   
-  return(cbind(estimate, genes))
+  return( list(results = cbind(estimate, genes), name = geneSetName, descriptions = geneSetDescriptions)) 
 }

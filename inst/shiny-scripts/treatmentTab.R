@@ -101,5 +101,3 @@ treatmentTabOutputUI <- function(input, rv, output) {
     }
   })
 }
-
-
