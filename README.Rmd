@@ -58,6 +58,12 @@ i.e.,
 PGxVision::runPGxVision()
 ```
 
+To build the documentation for the project, make sure to edit the README.Rmd file instead of README.md. Afterwards, you must run the following command in the home directory:
+
+``` r
+devtools::build_readme(path=".")
+```
+
 ### Dependencies
 
 Below are relevant dependencies that you will need to install in order to use PGxVision
@@ -162,11 +168,21 @@ The gene set analysis in this package is broken down into four steps:
    using their similarity scores from _computeGeneSetSimilarity_ as edge 
    weights. Gene sets that have high overlap will be in closer proximity and 
    will have thicker and darker edges between them.
-   
+  
 In addition to these four functions, the _geneSetAnalysis_ function is provided 
 to run the first three steps of the above pipeline. You can learn more about 
 how to use these gene set analysis functions in the Gene Set Analysis section 
 of the Visualizing and Interpreting Biomarkers vignette.
+
+### Single Sample Get Set Enrichment Analysis (ssGSEA)
+
+The _performSSGSEA_ function allows you to provide a dataframe containing a 
+sample's mRNA expression along with a JSON file containing the gene sets you
+wish to analyze. Example genesets are provided in the extdata/gsets directory, 
+and contain the MSigDB Hallmark gene sets. Gene IDs must be standardized 
+between the sample's expression dataframe and the ones used in the gene set 
+JSON file.
+
 
 ### Shiny Dashboard
 

@@ -16,18 +16,20 @@ univariateTabUI <- div(
   br(),
   div(class='flex', style='align-items: stretch',
       div(style='width: 33%',
-          # p("Please upload your reference population file"),
+          # File input for reference population matrix (.csv)
           fileInput("referencePopulationDf",
                     "",
                     accept=c("text/csv", ".csv"), buttonLabel="Browse files"),
           createTip("Tip", "File format must be .csv"),
       ),
+      # This is the info pane for the biomarkers displayed in this tab
       div(style='width: 67%; background-color: #ecf0f1; border-radius: 8px; padding: 8px;',
           uiOutput('selectedRow'),
       )
   ),
   br(),
 
+  # Data table containing biomarkers 
   dataTableOutput("pdbBiomarkers"),
 )
 
@@ -59,11 +61,16 @@ univariateTabObservers <- function(input, rv, globalRV) {
 #Return all output objects
 univariateTabOutputUI <- function (input, rv, output, globalRV) {
   output$selectedRow <- renderUI({
+    # Show a message if nothing is uploaded
     if (identical(rv$univarResultsDf, NULL)) { return(p("Please upload your reference population file.")) }
+    
+    # Otherwise, find the results
     else {
       index <- input$pdbBiomarkers_rows_selected
+      
+      # No row selected
       if (identical(index, NULL)) { return(p("Select a row to learn more."))}
-      # Find reevant pathways
+      # Find relevant pathways in the ssGSEA results to display
       gene <- rv$univarResultsDf[index,]$gene_symbol
       relevantPathways <- globalRV$ssGseaResults[grepl(pattern=gene, globalRV$ssGseaResults$genes), ]
       
@@ -93,6 +100,7 @@ univariateTabOutputUI <- function (input, rv, output, globalRV) {
         ))
     }})
 
+  # Display the results table from the univariate analysis
   output$pdbBiomarkers <- DT::renderDataTable({
     pdf <- globalRV$patientDf
     rdf <- globalRV$referenceDf
@@ -129,6 +137,7 @@ univariateTabOutputUI <- function (input, rv, output, globalRV) {
     df_ <- df_[order(abs(df_$score), decreasing=TRUE),
                c('compound_name', 'gene_symbol', 'correlation_direction', 'score',
                  'estimate', 'pvalue', 'percentile', 'pubchem', 'tissue')]
+    
     # Order the dataframe and add more human column names
     df_ <- df_[order(abs(df_$score), decreasing=TRUE),
       c('compound_name', 'gene_symbol', 'correlation_direction', 'score',

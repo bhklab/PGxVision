@@ -8,17 +8,33 @@
 
 ## Description
 
-PGxVision (PharmacoGenomics VISualization & InterpretatiON) helps identify and
-visualize RNA-based cancer biomarkers for drug response. PGxVision is intended to 
-guide cancer treatment decisions in molecular tumour boards.
+PGxVision (PharmacoGenomic Vision & Interpretation) helps identify and
+visualize RNA-based cancer biomarkers for drug response. This package is
+intended to be used in conjunction with the Roche-PharmacoGx pipeline.
+PGxVision is intended to guide cancer treatment decisions in molecular
+tumour boards.
+
+``` r
+R version 4.1.1 (2021-08-10)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19043)
+```
 
 ## Installation
 
 To download the package:
 
 ``` r
-remotes::install_github("bhklab/PGxVision", build_vignettes=TRUE)
+require("devtools")
+devtools::install_github("EvgeniyaGorobets/PGxVision", build_vignettes=TRUE)
 library("PGxVision")
+```
+
+To build the shinyapp:
+
+``` r
+roxygen2::roxygenise();
+devtools::install()
 ```
 
 To run the shinyApp:
@@ -26,6 +42,77 @@ To run the shinyApp:
 ``` r
 runPGxVision()
 ```
+
+i.e.,
+
+``` r
+PGxVision::runPGxVision()
+```
+
+
+To build the documentation for the project, make sure to edit the README.Rmd file instead of README.md. Afterwards, you must run the following command in the home directory:
+
+``` r
+devtools::build_readme(path=".")
+```
+
+
+### Dependencies
+
+Below are relevant dependencies that you will need to install in order
+to use PGxVision
+
+``` r
+# CORE DEPENDENCIES
+roxygen2
+devtools
+shiny
+shinyjs        
+
+# ADDITIONAL DEPENDENCIES
+plotly         # Data Visualization
+ggplot2        # Data Visualization
+magrittr       # A Forward-Pipe Operator for R
+jsonlite       # Read and Write JSON in R
+httr           # HTTP Requests
+data.table     # Data Table Processing 
+promises       # Asynchronous Functionality
+future         # Asynchronous Functionality
+shinyalert     # Provides Alert UI
+shinybusy      # Provides "Busy" UI Functionality and Animations
+msigdbr        # Access to MSig Database for Gene Sets1
+GSVA           # Single Sample GSEA. NOTE: This is a BHKLab fork of GSVA. View below.
+DT             # Data Table Processing 
+```
+
+To fork the BHKLab version of GSVA (which contains a patch to a bug in
+the SSGSEA functionality of the package), install GSVA like so:
+
+``` r
+devtools::install_github("bhklab/GSVA")
+```
+
+### Recommended Readings
+
+The following are recommended readings to hit the ground running when
+working on this project 1. RNA-based Drug Response Prediction Part 1 -
+Roche \[Internal Lab Document\] 2. RNA-based Drug Response Prediction
+Part 1 - Report \[Internal Lab Document\] 3. Smirnov, P. et
+al. PharmacoGx: an R package for analysis of large pharmacogenomic
+datasets. Bioinformatics 32, 1244–1246 (2016). 4. Haibe-Kains, B. et
+al. Inconsistency in large pharmacogenomic studies. Nature 504, 389–393
+(2013). 5. Safikhani, Z. et al. Revisiting inconsistency in large
+pharmacogenomic studies. F1000Res 5, 2333 (2017). 6. Seo, H. et
+al. SYNERGxDB: an integrative pharmacogenomic portal to identify
+synergistic drug combinations for precision oncology. Nucleic Acids
+Research 48, W494–W501 (2020). 7. Feizi, N. et al. PharmacoDB 2.0:
+improving scalability and transparency of in vitro pharmacogenomics
+analysis. Nucleic Acids Research 50, D1348–D1357 (2022). 8. Nair, S. K.
+et al. ToxicoDB: an integrated database to mine and visualize
+large-scale toxicogenomic datasets. Nucleic Acids Research 48, W455–W462
+(2020). 9. Adam, G. et al. Machine learning approaches to drug response
+prediction: challenges and recent progress. npj Precis. Onc. 4, 1–10
+(2020).
 
 ## Overview
 
@@ -145,6 +232,8 @@ gene ENSG00000012124 is a part of. It is used for testing and was
 retrieved from MSigDb.
 
 ## Contributions
+
+The author of the package is Evgeniya Gorobets.
 
 `data.table` is used to transform `data.frame`s into `data.table`s in
 some plotting and gene set analysis functions (*buildVolcanoPlot,
@@ -268,3 +357,8 @@ jdlong. (2018). How to stack two images horizontally in R Markdown.
 Perry & YakovL. (2017). Stop vis.js physics after nodes load but allow
 drag-able nodes. *StackOverflow.*
 <https://stackoverflow.com/questions/32403578/stop-vis-js-physics-after-nodes-load-but-allow-drag-able-nodes>
+
+## Acknowledgements
+
+This package was developed as part of an assessment for 2021 BCB410H:
+Applied Bioinformatics, University of Toronto, Toronto, CANADA.

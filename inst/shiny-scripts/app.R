@@ -25,8 +25,10 @@ options(shiny.maxRequestSize=250*1024^2) # max upload of 250 MB
 on.exit(options(opts))
 
 # Navigation function
+# This function is passed to all components which require navigation functionality
 navigate <- function(newPage, output) {
   output$app <- renderUI({
+    # Switch for determining which page to navigate to
     switch(newPage,
            home={return(uploadPageUI)},
            analysis={return(analysisPageUI)},
@@ -49,11 +51,14 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
+  # Global (application/website-level reactive values)
+  # This object is given to all components which require access (read or write) to app-level variables
+  # Changes in globalRV will trigger component updates in every and any component across the entire website
   globalRV <- reactiveValues(
-    patientDf=NULL,
-    referenceDf=NULL,
-    ssGseaResults=NULL,
-    ssGseaMetadata=NULL,
+    patientDf=NULL, # Patient expression matrix
+    referenceDf=NULL, # Population expression matrix
+    ssGseaResults=NULL, # Results from ssGSEA Analysis
+    ssGseaMetadata=NULL, # Metadata from ssGSEA. Stores descriptions of pathways.
   )
   
   # Logic to render different pages
